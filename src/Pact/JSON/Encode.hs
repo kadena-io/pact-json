@@ -26,6 +26,10 @@ module Pact.JSON.Encode
 ( Encode(..)
 , encode
 , encodeStrict
+, encodeText
+, JsonText
+, encodeJsonText
+, embedJson
 , Builder
 , KeyValue(..)
 , (.=)
@@ -47,6 +51,8 @@ module Pact.JSON.Encode
 , Base16(..)
 , Aeson(..)
 ) where
+
+import Control.DeepSeq
 
 import qualified Data.Aeson as A
 import qualified Data.Aeson.Key as A
@@ -155,6 +161,24 @@ encode :: Encode a => a -> BL.ByteString
 encode = BB.toLazyByteString . _unBuilder . build
 {-# INLINE encode #-}
 
+encodeText :: Encode a => a -> T.Text
+encodeText = T.decodeUtf8 . encodeStrict
+{-# INLINE encodeText #-}
+
+-- -------------------------------------------------------------------------- --
+--
+
+newtype JsonText = JsonText T.Text
+    deriving (Show, Eq, Ord, NFData)
+
+encodeJsonText :: Encode v => v -> JsonText
+encodeJsonText = JsonText . encodeText
+{-# INLINE encodeJsonText #-}
+
+embedJson :: JsonText -> Builder
+embedJson (JsonText t) = fromText t
+{-# INLINE embedJson #-}
+
 -- -------------------------------------------------------------------------- --
 -- RFC 8259, section 2, Grammar
 --
@@ -234,14 +258,20 @@ object :: Foldable f => f (Maybe KeyValue) -> Builder
 object a = obrace <> list (catMaybes $ toList a) <> cbrace
 {-# INLINE object #-}
 
+-- | Encode a property of an object
+--
 (.=) :: Encode a => T.Text -> a -> Maybe KeyValue
 k .= v = Just $ KeyValue k $ build v
 {-# INLINE (.=) #-}
 
+-- | Encode @Maybe@ types, where  @Nothing@ values are omitted.
+--
 (.?=) :: Encode a => T.Text -> Maybe a -> Maybe KeyValue
 (.?=) k = fmap $ KeyValue k . build
 {-# INLINE (.?=) #-}
 
+-- | Encode Monoid types where omits @mempty@ values
+--
 (.??=) :: Encode a => Eq a => Monoid a => T.Text -> a -> Maybe KeyValue
 (.??=) k a
     | a == mempty = Nothing
@@ -371,7 +401,7 @@ instance Encode Builder where
 -- -------------------------------------------------------------------------- --
 -- Instances
 
--- We deliberately provide only provide a small set of unopinionated instances.
+-- We deliberately provide only a small set of unopinionated instances.
 --
 -- PLEASE, DO NOT PROVIDE OPINIONATED INSTANCES.
 --
