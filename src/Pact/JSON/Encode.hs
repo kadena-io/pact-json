@@ -32,6 +32,8 @@ module Pact.JSON.Encode
 , encodeText
 , JsonText
 , encodeJsonText
+, encodeWithAeson
+, getJsonText
 , embedJson
 , Builder
 , KeyValue(..)
@@ -176,9 +178,17 @@ encodeJsonText :: Encode v => v -> JsonText
 encodeJsonText = JsonText . encodeText
 {-# INLINE encodeJsonText #-}
 
+encodeWithAeson :: A.ToJSON v => v -> JsonText
+encodeWithAeson = JsonText . T.decodeUtf8 . BL.toStrict . A.encode
+{-# INLINE encodeWithAeson #-}
+
 embedJson :: JsonText -> Builder
 embedJson (JsonText t) = fromText t
 {-# INLINE embedJson #-}
+
+getJsonText :: JsonText -> T.Text
+getJsonText (JsonText t) = t
+{-# INLINE getJsonText #-}
 
 -- -------------------------------------------------------------------------- --
 -- RFC 8259, section 2, Grammar
@@ -397,6 +407,10 @@ class Encode a where
 
 instance Encode Builder where
   build = id
+  {-# INLINE build #-}
+
+instance Encode JsonText where
+  build = embedJson
   {-# INLINE build #-}
 
 -- -------------------------------------------------------------------------- --
