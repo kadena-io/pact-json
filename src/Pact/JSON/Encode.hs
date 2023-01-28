@@ -1,4 +1,7 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE DeriveFoldable #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -65,9 +68,7 @@ import qualified Data.ByteString.Builder.Scientific as BBS
 import qualified Data.ByteString.Lazy as BL
 import Data.Char
 import Data.Foldable hiding (null)
-import qualified Data.HashMap.Strict as HM
 import Data.Int
-import qualified Data.List as L
 import qualified Data.List.NonEmpty as LNE
 import Data.Maybe
 import Data.Monoid
@@ -409,6 +410,8 @@ instance Encode Builder where
 --
 -- Instead that goal is that instances are explicit about how values of a given
 -- type are serialized. There should be no hidden magic.
+--
+-- Newtype wrappers are provided for specifying particular encodings
 
 instance Encode Bool where
   build True = true
@@ -500,6 +503,8 @@ instance Encode (Base16 Word) where
 -- as empty Arrays.
 --
 newtype Array a = Array a
+    deriving newtype (Show, Eq, Ord, Semigroup, Monoid)
+    deriving (Foldable, Traversable, Functor)
 
 instance Encode a => Encode (Array [a]) where
   build (Array a) = array a
@@ -662,8 +667,8 @@ instance Encode (Aeson Natural) where
 -- -------------------------------------------------------------------------- --
 -- Encoding Aeson Value
 
--- | Encode an aeson 'Value'. For aeson version 2 onwoards, properties are sort
--- lexicographically by the textual representaiton of the key values in
+-- | Encode an aeson 'Value'. For aeson version 2 onwoards, properties are
+-- sorted lexicographically by the textual representaiton of the key values in
 -- ascending order.
 --
 instance Encode A.Value where
