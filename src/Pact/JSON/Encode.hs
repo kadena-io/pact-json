@@ -544,7 +544,7 @@ instance Encode a => Encode (Array (Set.Set a)) where
 
 #if MIN_VERSION_base(4,16,0)
 instance Encode a => Encode (Array (Solo a)) where
-  build (Array a) = array [a]
+  build (Array (Solo a)) = array [a]
   {-# INLINE build #-}
 #endif
 
