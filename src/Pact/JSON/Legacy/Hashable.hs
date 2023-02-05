@@ -27,6 +27,7 @@ import Data.Aeson
 import qualified Data.Aeson.Key as A
 import Data.Bits
 import qualified Data.ByteString as B
+import qualified Data.ByteString.Short as BS
 import Data.Hashable
 import Data.Int
 import qualified Data.List as L
@@ -149,4 +150,27 @@ hashable_fnv1 = hashable_fnv1_withSalt hashable_default_salt
   hashable_default_salt :: Int64
   hashable_default_salt = -2578643520546668380
 {-# INLINE hashable_fnv1 #-}
+
+-- -------------------------------------------------------------------------- --
+-- Hashing of ByteString and ShortByteString for hashable <1.3.1
+
+-- The hash for ByteString and ShortByteString changes in version 1.3.1 (fixed
+-- fnv1 implementation, see above) and 1.3.4.0 of the hashable package
+-- (https://github.com/haskell-unordered-containers/hashable/pull/223). The
+-- following code preserves the old behavior.
+--
+-- (The behavior for lazy bytestrings changes, too, but we don't include the
+-- legacy behavior here.)
+
+instance LegacyHashable BS.ShortByteString where
+    legacyHash = legacyHash . BS.fromShort
+    legacyHashWithSalt salt = legacyHashWithSalt salt . BS.fromShort
+    {-# INLINE legacyHash #-}
+    {-# INLINE legacyHashWithSalt #-}
+
+instance LegacyHashable B.ByteString where
+    legacyHash = fromIntegral . hashable_fnv1
+    legacyHashWithSalt salt = fromIntegral . hashable_fnv1_withSalt (fromIntegral salt)
+    {-# INLINE legacyHash #-}
+    {-# INLINE legacyHashWithSalt #-}
 
