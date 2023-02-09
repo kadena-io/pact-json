@@ -21,6 +21,7 @@ module Pact.JSON.Legacy.Hashable
 , legacyHashSort
 , hashable_fnv1
 , hashable_fnv1_withSalt
+, legacyDefaultSalt
 ) where
 
 import Data.Aeson
@@ -104,6 +105,9 @@ instance (LegacyHashable a1, LegacyHashable a2) => LegacyHashable (a1, a2) where
 defaultLegacyHashWithSalt :: LegacyHashable a => Int -> a -> Int
 defaultLegacyHashWithSalt salt = xor (salt * 16777619) . legacyHash
 {-# INLINE defaultLegacyHashWithSalt #-}
+
+legacyDefaultSalt :: Int
+legacyDefaultSalt = -2578643520546668380
 
 -- -------------------------------------------------------------------------- --
 -- Use legacy hash with the Hashable class

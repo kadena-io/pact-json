@@ -213,6 +213,12 @@ legacyMap_ = LHM.fromList . M.toList
 -- evidence), that a non-textual encoding is almost always uninteded and
 -- enforcing a textual encoding catches those issues.
 --
+-- That said, there are occurences of Hashmaps with non-textual keys (even for
+-- key types that have ToJSONKey instances) where the map is encoded as list of
+-- pairs (lists of length 2), which is the default encoding in aeson. For these
+-- (probaby unintentional) special cases we also provide 'legacyHashMap_' which
+-- has  'LegacyHashable' constraint for the key type.
+--
 legacyHashMap
   :: HasCallStack
   => Typeable a
