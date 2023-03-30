@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -29,6 +30,7 @@ import qualified Data.Aeson.Key as A
 import Data.Bits
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Short as BS
+import Data.Foldable
 import Data.Hashable
 import Data.Int
 import qualified Data.List as L
@@ -101,6 +103,14 @@ instance (LegacyHashable a1, LegacyHashable a2) => LegacyHashable (a1, a2) where
   legacyHashWithSalt s (a1, a2) = s `legacyHashWithSalt` a1 `legacyHashWithSalt` a2
   {-# INLINE legacyHash #-}
   {-# INLINE legacyHashWithSalt #-}
+
+instance LegacyHashable a => LegacyHashable [a] where
+  legacyHash = legacyHashWithSalt legacyDefaultSalt
+  legacyHashWithSalt salt = uncurry legacyHashWithSalt . foldl' go (salt, 0)
+   where
+    go :: LegacyHashable a => (Int, Int) -> a -> (Int, Int)
+    go (!s, !l) x = (legacyHashWithSalt s x, l + 1)
+  {-# SPECIALIZE instance LegacyHashable [Char] #-}
 
 defaultLegacyHashWithSalt :: LegacyHashable a => Int -> a -> Int
 defaultLegacyHashWithSalt salt = xor (salt * 16777619) . legacyHash
