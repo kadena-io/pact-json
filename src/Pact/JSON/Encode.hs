@@ -76,6 +76,7 @@ import Data.Maybe
 import Data.Monoid
 import qualified Data.Scientific as S
 import qualified Data.Set as Set
+import qualified Data.Map.Strict as M
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 #if MIN_VERSION_base(4,16,0)
@@ -592,6 +593,10 @@ instance Encode a => Encode (Object [(T.Text, a)]) where
 
 instance Encode a => Encode (Object (V.Vector (T.Text, a))) where
   build (Object a) = build . Object $ toList a
+  {-# INLINE build #-}
+
+instance Encode a => Encode (Object (M.Map T.Text a)) where
+  build (Object a) = build . Object $ M.toList a
   {-# INLINE build #-}
 
 instance Encode a => Encode (Object (LNE.NonEmpty (T.Text, a))) where

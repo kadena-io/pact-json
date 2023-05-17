@@ -29,6 +29,7 @@ library
     Pact.JSON.Legacy.HashMap
     Pact.JSON.Legacy.Hashable
     Pact.JSON.Legacy.Value
+    Pact.JSON.Legacy.Utils
     Pact.JSON.Value
   build-depends:
     , aeson >=2.0
