@@ -31,6 +31,7 @@ library
     Pact.JSON.Legacy.Value
     Pact.JSON.Legacy.Utils
     Pact.JSON.Value
+    Pact.JSON.Yaml
   build-depends:
     , aeson >=2.0
     , base <5
@@ -42,6 +43,7 @@ library
     , text >=2.0
     , unordered-containers >=0.2.16
     , vector >=0.12.2
+    , yaml >= 0.11
 
 test-suite json-tests
   main-is: Main.hs
