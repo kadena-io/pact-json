@@ -12,6 +12,7 @@ module Pact.JSON.Legacy.Value
 ( -- LegacyValue
   LegacyValue(..)
 , toLegacyJson
+, toLegacyJsonViaEncode
 
 ) where
 
@@ -94,6 +95,11 @@ instance J.Encode LegacyValue where
   build (LegacyValue (Object o)) = J.build $ LegacyValue <$> legacyKeyMap o
   build (LegacyValue (Array a)) = J.build $ J.Array $ LegacyValue <$> a
   build (LegacyValue v) = J.build v
-
   {-# INLINE build #-}
+
+toLegacyJsonViaEncode :: HasCallStack => J.Encode a => a -> LegacyValue
+toLegacyJsonViaEncode a = case eitherDecode (J.encode a) of
+  Left e -> error $ "Pact.JSON.Legacy.Value.toLegacyJsonViaEncode: value does not roundtrip. This is a bug in pact-json. " <> e
+  Right r -> r
+{-# INLINE toLegacyJsonViaEncode #-}
 
