@@ -30,6 +30,7 @@ module Pact.JSON.Encode
 , encode
 , encodeStrict
 , encodeText
+, encodeFile
 , JsonText
 , encodeJsonText
 , encodeWithAeson
@@ -44,6 +45,7 @@ module Pact.JSON.Encode
 , object
 , array
 , text
+, string
 , null
 , number
 , true
@@ -168,6 +170,10 @@ encode = BB.toLazyByteString . _unBuilder . build
 encodeText :: Encode a => a -> T.Text
 encodeText = T.decodeUtf8 . encodeStrict
 {-# INLINE encodeText #-}
+
+encodeFile :: Encode a => FilePath -> a -> IO ()
+encodeFile f = BL.writeFile f . encode
+{-# INLINE encodeFile #-}
 
 -- -------------------------------------------------------------------------- --
 --
@@ -375,6 +381,9 @@ quote = singleton '"'
 text :: T.Text -> Builder
 text t = quote <> Builder (T.encodeUtf8BuilderEscaped escapeAscii t) <> quote
 {-# INLINE text #-}
+
+string :: String -> Builder
+string = text . T.pack
 
 -- The following code in this section is copy and pasted from aeson.
 
