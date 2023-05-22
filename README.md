@@ -7,6 +7,7 @@ Its focus is on precice and explicit control of serialization format by the
 library user. It prioritizes these features over convenience; there is no
 `Generics`-based instance deriving and no generic intermediate value like
 `Data.Aeson.Value`.
+The library includes a number of utils to reproduce encodings that are backward compatible with `aeson <2`, `hashable <1.3.1`, and `unordered-containers <0.2.16`. These utils can be found under `Pact.JSON.Legacy`.
 
 ## Exmaple usage
 
