@@ -22,6 +22,7 @@ import qualified Pact.JSON.Encode as J
 
 example1 :: BS.ByteString
 example1 = J.encodeStrict (J.object ["a" J..= J.Aeson (1::Int)])
+    -- the 'J.Aeson' combinator provides encodings for primitive types that are compatible with `aeson`.
 
 example2 :: BS.ByteString
 example2 = J.encode (J.object ["a" J..= J.Aeson (1::Int)])
