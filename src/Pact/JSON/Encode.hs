@@ -57,6 +57,9 @@ module Pact.JSON.Encode
 , Base10(..)
 , Base16(..)
 , Aeson(..)
+
+-- Aeson ToJSON via Encode
+, toJsonViaEncode
 ) where
 
 import Control.DeepSeq
@@ -87,6 +90,8 @@ import Data.Tuple
 import qualified Data.Vector as V
 import Data.Void
 import Data.Word
+
+import GHC.Stack
 
 import Numeric.Natural
 
@@ -707,4 +712,13 @@ instance Encode A.Value where
   build (A.Number n) = build $ Aeson n
   build A.Null = null
   {-# INLINE build #-}
+
+-- -------------------------------------------------------------------------- --
+-- ToJSON Via Encode
+
+toJsonViaEncode :: HasCallStack => Encode a => a -> A.Value
+toJsonViaEncode a = case A.eitherDecode (encode a) of
+  Left e -> error $ "Pact.JSON.Encode.toJsonViaEncode: value does not roundtrip. This is a bug in pact-json. " <> e
+  Right r -> r
+{-# INLINE toJsonViaEncode #-}
 
