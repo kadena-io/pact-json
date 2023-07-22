@@ -1,6 +1,8 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -55,6 +57,8 @@ module Pact.JSON.Legacy.HashMap
 , sortByKey
 ) where
 
+import Control.DeepSeq
+
 import Data.Aeson
 import qualified Data.Aeson.Encoding as AE
 import Data.Aeson.Types
@@ -65,6 +69,7 @@ import qualified Data.Foldable as F
 import qualified Data.Text as T
 import Data.Word
 
+import GHC.Generics
 import GHC.Stack
 
 import Prelude hiding (null)
@@ -91,7 +96,7 @@ type Bitmap = Word64
 type Shift  = Int
 
 data Leaf k v = L !k v
-  deriving (Show, Eq)
+  deriving (Show, Eq, Generic, NFData)
 
 -- | A 'HashMap' that preserves the behavior of `Data.HashMap.Strict' from
 -- unordered-containers-0.2.15.0.
@@ -102,7 +107,7 @@ data HashMap k v
   | Leaf !Hash !(Leaf k v)
   | Full ![HashMap k v]
   | Collision !Hash ![Leaf k v]
-  deriving (Show, Eq)
+  deriving (Show, Eq, Generic, NFData)
 
 instance ToJSONKey k => ToJSON1 (HashMap k) where
 #if MIN_VERSION_aeson(2,2,0)
