@@ -1,4 +1,5 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -104,8 +105,17 @@ data HashMap k v
   deriving (Show, Eq)
 
 instance ToJSONKey k => ToJSON1 (HashMap k) where
+#if MIN_VERSION_aeson(2,2,0)
+  liftToJSON _ _ _ = error "Pact.Utils.LegacyHashMap: Using toJSON on Legacy HashMaps is not supported"
+#else
   liftToJSON _ _ = error "Pact.Utils.LegacyHashMap: Using toJSON on Legacy HashMaps is not supported"
+#endif
+
+#if MIN_VERSION_aeson(2,2,0)
+  liftToEncoding _ g _ = case toJSONKey of
+#else
   liftToEncoding g _ = case toJSONKey of
+#endif
       ToJSONKeyText _ f -> AE.dict f g foldrWithKey
       ToJSONKeyValue _ f -> listEncoding (pairEncoding f) . toList
     where
