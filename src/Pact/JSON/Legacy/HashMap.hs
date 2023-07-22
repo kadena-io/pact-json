@@ -153,6 +153,20 @@ instance Bifoldable HashMap where
   bifoldl f g = foldlWithKey (\ acc k v -> (acc `f` k) `g` v)
   {-# INLINE bifoldl #-}
 
+-- | Left biased Semigroup instance for ModuleCache.
+--
+-- This operation is not communtative.
+--
+instance LegacyHashable k => Semigroup (HashMap k v) where
+    (<>) = foldrWithKey insert
+    {-# INLINE (<>) #-}
+
+-- | Left biased Monoid instance for ModuleCache.
+--
+instance LegacyHashable k => Monoid (HashMap k v) where
+    mempty = empty
+    {-# INLINE mempty #-}
+
 -- -------------------------------------------------------------------------- --
 -- Creation
 
